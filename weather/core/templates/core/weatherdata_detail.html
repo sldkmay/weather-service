@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Детали погодных данных</h2>
+    <table class="table table-bordered">
+        <tr><th>Город</th><td>{{ weatherdata.city.name }}</td></tr>
+        <tr><th>Страна</th><td>{{ weatherdata.city.country }}</td></tr>
+        <tr><th>Время обновления</th><td>{{ weatherdata.last_updated|date:'d.m.Y H:i' }}</td></tr>
+        <tr><th>Темп. (°C)</th><td>{{ weatherdata.temp_c }}</td></tr>
+        <tr><th>Темп. (°F)</th><td>{{ weatherdata.temp_f }}</td></tr>
+        <tr><th>Состояние</th><td>{{ weatherdata.condition.text }}</td></tr>
+        <tr><th>Иконка</th><td>{% if weatherdata.condition.icon_url %}<img class="weather-icon" src="{% if weatherdata.condition.icon_url|slice:':2' == '//' %}https:{{ weatherdata.condition.icon_url }}{% else %}{{ weatherdata.condition.icon_url }}{% endif %}" alt="icon">{% endif %}</td></tr>
+        <tr><th>Ветер (mph)</th><td>{{ weatherdata.wind_mph }}</td></tr>
+        <tr><th>Ветер (kph)</th><td>{{ weatherdata.wind_kph }}</td></tr>
+        <tr><th>Угол ветра</th><td>{{ weatherdata.wind_degree }}</td></tr>
+        <tr><th>Направление ветра</th><td>{{ weatherdata.wind_dir }}</td></tr>
+        <tr><th>Давление (mb)</th><td>{{ weatherdata.pressure_mb }}</td></tr>
+        <tr><th>Давление (in)</th><td>{{ weatherdata.pressure_in }}</td></tr>
+        <tr><th>Осадки (mm)</th><td>{{ weatherdata.precip_mm }}</td></tr>
+        <tr><th>Осадки (in)</th><td>{{ weatherdata.precip_in }}</td></tr>
+        <tr><th>Влажность (%)</th><td>{{ weatherdata.humidity }}</td></tr>
+        <tr><th>Облачность (%)</th><td>{{ weatherdata.cloud }}</td></tr>
+        <tr><th>Ощущается (°C)</th><td>{{ weatherdata.feelslike_c }}</td></tr>
+        <tr><th>Ощущается (°F)</th><td>{{ weatherdata.feelslike_f }}</td></tr>
+        <tr><th>Windchill (°C)</th><td>{{ weatherdata.windchill_c }}</td></tr>
+        <tr><th>Windchill (°F)</th><td>{{ weatherdata.windchill_f }}</td></tr>
+        <tr><th>Heatindex (°C)</th><td>{{ weatherdata.heatindex_c }}</td></tr>
+        <tr><th>Heatindex (°F)</th><td>{{ weatherdata.heatindex_f }}</td></tr>
+        <tr><th>Dewpoint (°C)</th><td>{{ weatherdata.dewpoint_c }}</td></tr>
+        <tr><th>Dewpoint (°F)</th><td>{{ weatherdata.dewpoint_f }}</td></tr>
+        <tr><th>Видимость (км)</th><td>{{ weatherdata.vis_km }}</td></tr>
+        <tr><th>Видимость (миль)</th><td>{{ weatherdata.vis_miles }}</td></tr>
+        <tr><th>UV</th><td>{{ weatherdata.uv }}</td></tr>
+        <tr><th>Порывы ветра (mph)</th><td>{{ weatherdata.gust_mph }}</td></tr>
+        <tr><th>Порывы ветра (kph)</th><td>{{ weatherdata.gust_kph }}</td></tr>
+        <tr><th>Локальное время</th><td>{{ weatherdata.localtime|date:'d.m.Y H:i' }}</td></tr>
+    </table>
+    <a href="{% url 'weatherdata_edit' weatherdata.pk %}" class="btn btn-primary">Редактировать</a>
+    <a href="{% url 'weatherdata_delete' weatherdata.pk %}" class="btn btn-danger">Удалить</a>
+    <a href="{% url 'my_weatherdata_list' %}" class="btn btn-secondary">Назад к списку</a>
+</div>
+{% endblock %} 

@@ -1,0 +1,29 @@
+body {
+    background: linear-gradient(120deg, #e0eafc, #cfdef3);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.weather-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 24px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    transition: box-shadow 0.2s;
+}
+.weather-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.weather-icon {
+    width: 64px;
+    height: 64px;
+    margin-right: 24px;
+}
+
+.table-weather th, .table-weather td {
+    vertical-align: middle;
+} 

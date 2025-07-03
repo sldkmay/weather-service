@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Мои города (избранные)</h1>
+    <div class="mb-3">
+        <a href="{% url 'add_favorite_city' %}" class="btn btn-success">Добавить город в избранное</a>
+        <form method="post" action="{% url 'weatherdata_sync_all' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning">Синхронизировать все</button>
+        </form>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Город</th>
+                <th>Страна</th>
+                <th>Время обновления</th>
+                <th>Темп. (°C)</th>
+                <th>Темп. (°F)</th>
+                <th>Состояние</th>
+                <th>Иконка</th>
+                <th>Ветер (mph)</th>
+                <th>Ветер (kph)</th>
+                <th>Угол ветра</th>
+                <th>Направление ветра</th>
+                <th>Давление (mb)</th>
+                <th>Давление (in)</th>
+                <th>Осадки (mm)</th>
+                <th>Осадки (in)</th>
+                <th>Влажность (%)</th>
+                <th>Облачность (%)</th>
+                <th>Ощущается (°C)</th>
+                <th>Ощущается (°F)</th>
+                <th>Windchill (°C)</th>
+                <th>Windchill (°F)</th>
+                <th>Heatindex (°C)</th>
+                <th>Heatindex (°F)</th>
+                <th>Dewpoint (°C)</th>
+                <th>Dewpoint (°F)</th>
+                <th>Видимость (км)</th>
+                <th>Видимость (миль)</th>
+                <th>UV</th>
+                <th>Порывы ветра (mph)</th>
+                <th>Порывы ветра (kph)</th>
+                <th>Локальное время</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for weather in weather_data %}
+            <tr>
+                <td>{{ weather.city.name }}</td>
+                <td>{{ weather.city.country }}</td>
+                <td>{{ weather.last_updated|date:'d.m.Y H:i' }}</td>
+                <td>{{ weather.temp_c }}</td>
+                <td>{{ weather.temp_f }}</td>
+                <td>{{ weather.condition.text }}</td>
+                <td>
+                    {% if weather.condition.icon_url %}
+                        <img class="weather-icon" src="{% if weather.condition.icon_url|slice:':2' == '//' %}https:{{ weather.condition.icon_url }}{% else %}{{ weather.condition.icon_url }}{% endif %}" alt="icon">
+                    {% endif %}
+                </td>
+                <td>{{ weather.wind_mph }}</td>
+                <td>{{ weather.wind_kph }}</td>
+                <td>{{ weather.wind_degree }}</td>
+                <td>{{ weather.wind_dir }}</td>
+                <td>{{ weather.pressure_mb }}</td>
+                <td>{{ weather.pressure_in }}</td>
+                <td>{{ weather.precip_mm }}</td>
+                <td>{{ weather.precip_in }}</td>
+                <td>{{ weather.humidity }}</td>
+                <td>{{ weather.cloud }}</td>
+                <td>{{ weather.feelslike_c }}</td>
+                <td>{{ weather.feelslike_f }}</td>
+                <td>{{ weather.windchill_c }}</td>
+                <td>{{ weather.windchill_f }}</td>
+                <td>{{ weather.heatindex_c }}</td>
+                <td>{{ weather.heatindex_f }}</td>
+                <td>{{ weather.dewpoint_c }}</td>
+                <td>{{ weather.dewpoint_f }}</td>
+                <td>{{ weather.vis_km }}</td>
+                <td>{{ weather.vis_miles }}</td>
+                <td>{{ weather.uv }}</td>
+                <td>{{ weather.gust_mph }}</td>
+                <td>{{ weather.gust_kph }}</td>
+                <td>{{ weather.localtime|date:'d.m.Y H:i' }}</td>
+                <td>
+                    <a href="{% url 'weatherdata_detail' weather.pk %}" class="btn btn-info btn-sm">Детали</a>
+                    <a href="{% url 'weatherdata_delete' weather.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %} 
