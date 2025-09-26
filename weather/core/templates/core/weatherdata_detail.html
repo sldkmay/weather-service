@@ -35,8 +35,10 @@
         <tr><th>Порывы ветра (kph)</th><td>{{ weatherdata.gust_kph }}</td></tr>
         <tr><th>Локальное время</th><td>{{ weatherdata.localtime|date:'d.m.Y H:i' }}</td></tr>
     </table>
-    <a href="{% url 'weatherdata_edit' weatherdata.pk %}" class="btn btn-primary">Редактировать</a>
-    <a href="{% url 'weatherdata_delete' weatherdata.pk %}" class="btn btn-danger">Удалить</a>
+    <form method="post" action="{% url 'unfavorite_city' weatherdata.city.pk %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Убрать из избранного</button>
+    </form>
     <a href="{% url 'my_weatherdata_list' %}" class="btn btn-secondary">Назад к списку</a>
 </div>
 {% endblock %} 

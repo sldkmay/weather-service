@@ -1,11 +1,11 @@
 {% extends 'core/base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h2>Добавить город в избранные</h2>
+    <h2>{% if form.instance.pk %}Редактировать избранный город{% else %}Добавить город в избранные{% endif %}</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Добавить</button>
+        <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Сохранить{% else %}Добавить{% endif %}</button>
     </form>
 </div>
 {% endblock %} 

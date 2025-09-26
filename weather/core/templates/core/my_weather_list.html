@@ -87,7 +87,15 @@
                 <td>{{ weather.localtime|date:'d.m.Y H:i' }}</td>
                 <td>
                     <a href="{% url 'weatherdata_detail' weather.pk %}" class="btn btn-info btn-sm">Детали</a>
-                    <a href="{% url 'weatherdata_delete' weather.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                    {% for favorite in weather.city.fans.all %}
+                        {% if favorite.user == request.user %}
+                            <a href="{% url 'edit_favorite_city' favorite.pk %}" class="btn btn-warning btn-sm">Изменить город</a>
+                        {% endif %}
+                    {% endfor %}
+                    <form method="post" action="{% url 'unfavorite_city' weather.city.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Убрать из избранного</button>
+                    </form>
                 </td>
             </tr>
         {% endfor %}

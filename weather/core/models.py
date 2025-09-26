@@ -58,6 +58,11 @@ class WeatherData(models.Model):
     def __str__(self):
         return f"Weather for {self.city.name} at {self.last_updated}"
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["city"], name="unique_weatherdata_per_city"),
+        ]
+
 class Forecast(models.Model):
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name="forecasts")
     forecast_date = models.DateField()

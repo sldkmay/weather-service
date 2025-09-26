@@ -16,7 +16,11 @@ class UserFavoriteCityForm(forms.ModelForm):
         cleaned_data = super().clean()
         city = cleaned_data.get('city')
         if self.user and city:
-            if UserFavoriteCity.objects.filter(user=self.user, city=city).exists():
+            qs = UserFavoriteCity.objects.filter(user=self.user, city=city)
+            # Exclude current instance when updating
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
                 self.add_error('city', 'Этот город уже есть в ваших избранных.')
         return cleaned_data
 
@@ -24,6 +28,7 @@ class WeatherDataForm(forms.ModelForm):
     class Meta:
         model = WeatherData
         fields = ['city']
+
 
 class SignUpForm(forms.ModelForm):
     password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput)

@@ -18,6 +18,7 @@ import django.db
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
 
 def index(request):
     return render(request, 'core/index.html')
@@ -44,6 +45,26 @@ class UserFavoriteCityCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+class UserFavoriteCityUpdateView(LoginRequiredMixin, UpdateView):
+    model = UserFavoriteCity
+    form_class = UserFavoriteCityForm
+    template_name = 'core/add_favorite_city.html'
+    success_url = reverse_lazy('my_weatherdata_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        # Ensure the user cannot change the owner
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    
+    def get_queryset(self):
+        # Only allow users to edit their own favorite cities
+        return UserFavoriteCity.objects.filter(user=self.request.user)
+
 class CityListView(FilterView):
     model = City
     template_name = 'core/city_list.html'
@@ -61,7 +82,7 @@ class WeatherDataCreateView(CreateView):
     model = WeatherData
     form_class = WeatherDataForm
     template_name = 'core/weatherdata_form.html'
-    success_url = reverse_lazy('weatherdata_list')
+    success_url = reverse_lazy('my_weatherdata_list')
 
     def form_valid(self, form):
         city = form.cleaned_data['city']
@@ -85,7 +106,8 @@ class WeatherDataCreateView(CreateView):
         condition.save()
         localtime_str = data['location']['localtime']
         try:
-            localtime = datetime.strptime(localtime_str, '%Y-%m-%d %H:%M')
+            naive_localtime = datetime.strptime(localtime_str, '%Y-%m-%d %H:%M')
+            localtime = timezone.make_aware(naive_localtime, timezone.get_current_timezone())
         except Exception:
             localtime = timezone.now()
         try:
@@ -126,16 +148,11 @@ class WeatherDataCreateView(CreateView):
             return self.form_invalid(form)
         return redirect(self.success_url)
 
-class WeatherDataUpdateView(UpdateView):
-    model = WeatherData
-    form_class = WeatherDataForm
-    template_name = 'core/weatherdata_form.html'
-    success_url = reverse_lazy('weatherdata_list')
 
 class WeatherDataDeleteView(DeleteView):
     model = WeatherData
     template_name = 'core/weatherdata_confirm_delete.html'
-    success_url = reverse_lazy('weatherdata_list')
+    success_url = reverse_lazy('my_weatherdata_list')
 
 class WeatherDataDetailView(DetailView):
     model = WeatherData
@@ -147,7 +164,7 @@ class WeatherDataSyncAllView(View):
         api_key = getattr(settings, 'WEATHER_API_KEY', None)
         if not api_key:
             messages.error(request, 'API ключ не найден в настройках!')
-            return redirect('weatherdata_list')
+            return redirect('my_weatherdata_list')
         for city in City.objects.all():
             url = f'http://api.weatherapi.com/v1/current.json?key={api_key}&q={city.name}&lang=ru'
             response = requests.get(url)
@@ -164,9 +181,16 @@ class WeatherDataSyncAllView(View):
             condition.save()
             localtime_str = data['location']['localtime']
             try:
-                localtime = datetime.strptime(localtime_str, '%Y-%m-%d %H:%M')
+                naive_localtime = datetime.strptime(localtime_str, '%Y-%m-%d %H:%M')
+                localtime = timezone.make_aware(naive_localtime, timezone.get_current_timezone())
             except Exception:
                 localtime = timezone.now()
+            # Deduplicate existing WeatherData for the city before upserting
+            existing_qs = WeatherData.objects.filter(city=city).order_by('-last_updated')
+            if existing_qs.count() > 1:
+                # Keep the most recent; delete older duplicates
+                for duplicate in existing_qs[1:]:
+                    duplicate.delete()
             WeatherData.objects.update_or_create(
                 city=city,
                 defaults={
@@ -225,6 +249,14 @@ class MyWeatherDataListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return WeatherData.objects.filter(city__fans__user=self.request.user).distinct()
+
+@login_required
+@require_POST
+def unfavorite_city(request, pk):
+    # pk is City id; remove favorite relation for current user
+    UserFavoriteCity.objects.filter(user=request.user, city_id=pk).delete()
+    messages.success(request, 'Город удалён из избранного.')
+    return redirect('my_weatherdata_list')
 
 def signup(request):
     if request.method == 'POST':
